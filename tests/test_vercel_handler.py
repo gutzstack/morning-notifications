@@ -48,13 +48,13 @@ class HandlerTest(unittest.TestCase):
             self.assertIn(" 200 ", call({}, "/api/morning?key=s3cret"))
             run.assert_called_once()
 
-    def test_missing_cron_secret_explains_setup(self):
+    def test_no_cron_secret_runs_without_auth(self):
         with mock.patch.dict(os.environ, {"CRON_SECRET": ""}), \
-             mock.patch.object(morning.morning_brief, "run") as run:
-            out = call({"Authorization": "Bearer "})
-        self.assertIn(" 500 ", out)
-        self.assertIn("CRON_SECRET is not set", out)
-        run.assert_not_called()
+             mock.patch.object(morning.morning_brief, "run",
+                               return_value=("Title", "Body", True)):
+            out = call({})
+        self.assertIn(" 200 ", out)
+        self.assertIn("Body", out)
 
 
 if __name__ == "__main__":

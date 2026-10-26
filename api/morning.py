@@ -1,6 +1,7 @@
 """Vercel serverless entry point. Vercel Cron calls GET /api/morning daily
 (see vercel.json) with "Authorization: Bearer $CRON_SECRET". For testing from
-a browser, the secret can also be passed as /api/morning?key=<CRON_SECRET>."""
+a browser, the secret can also be passed as /api/morning?key=<CRON_SECRET>.
+If CRON_SECRET is not set, the endpoint is open: anyone with the URL can send a brief."""
 
 import hmac
 import os
@@ -17,11 +18,7 @@ import morning_brief
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         secret = os.environ.get("CRON_SECRET")
-        if not secret:
-            self._reply(500, "CRON_SECRET is not set. Add it in Vercel → Settings → "
-                             "Environment Variables, then redeploy.\n")
-            return
-        if not self._authorized(secret):
+        if secret and not self._authorized(secret):
             self._reply(401, "Unauthorized. To send a brief from a browser, open "
                              "/api/morning?key=<your CRON_SECRET>\n")
             return
