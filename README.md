@@ -37,7 +37,10 @@ To use it:
    request, and the endpoint rejects any request that doesn't include it.
 3. Redeploy. Then turn off the GitHub Actions schedule, or you'll get two briefs every morning.
 
-To trigger it manually: `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`
+To trigger it manually, open `https://<your-app>.vercel.app/api/morning?key=<CRON_SECRET>` in a browser,
+or run `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`.
+Opening `/api/morning` without the key shows "Unauthorized". That is expected: it stops strangers from
+sending you briefs.
 
 ## Schedule
 
