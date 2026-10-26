@@ -181,31 +181,36 @@ def send_email(title: str, body: str) -> None:
         smtp.send_message(msg)
 
 
-def run() -> tuple[str, str, bool]:
-    """Build and deliver today's brief. Returns (title, body, ok)."""
+def run(deliver: bool = True) -> dict:
+    """Build today's brief and, if deliver is set, send it. Returns a dict with
+    date, title, body, facts, us, world, and ok (False if any delivery failed)."""
     today = dt.date.today()
     title = f"Good morning! Your brief for {today:%a %b} {today.day}"
-    body = build_brief(get_facts(today), fetch_story(US_FEED), fetch_story(WORLD_FEED))
+    facts, us, world = get_facts(today), fetch_story(US_FEED), fetch_story(WORLD_FEED)
+    body = build_brief(facts, us, world)
+    brief = {"date": today, "title": title, "body": body,
+             "facts": facts, "us": us, "world": world, "ok": True}
     print(title, body, sep="\n\n")
+    if not deliver:
+        return brief
 
-    ok = True
     if topic := os.environ.get("NTFY_TOPIC"):
         try:
             send_ntfy(topic, title, body)
         except Exception as e:
             print(f"ntfy delivery failed: {e!r}", file=sys.stderr)
-            ok = False
+            brief["ok"] = False
     if os.environ.get("SMTP_HOST") and os.environ.get("EMAIL_TO"):
         try:
             send_email(title, body)
         except Exception as e:
             print(f"Email delivery failed: {e!r}", file=sys.stderr)
-            ok = False
-    return title, body, ok
+            brief["ok"] = False
+    return brief
 
 
 def main() -> int:
-    return 0 if run()[2] else 1
+    return 0 if run()["ok"] else 1
 
 
 if __name__ == "__main__":

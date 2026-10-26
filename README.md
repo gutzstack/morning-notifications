@@ -38,10 +38,12 @@ To use it:
    anyone who knows your app's URL can trigger a brief.
 3. Redeploy. Then turn off the GitHub Actions schedule, or you'll get two briefs every morning.
 
-To trigger it manually, open `https://<your-app>.vercel.app/api/morning?key=<CRON_SECRET>` in a browser,
-or run `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`.
-With `CRON_SECRET` set, opening `/api/morning` without the key shows "Unauthorized". That is
-expected: it stops strangers from sending you briefs. Without `CRON_SECRET`, just open `/api/morning`.
+**The website:** open `https://<your-app>.vercel.app` in a browser to see today's brief as a web page.
+Viewing it doesn't send anything. Tap **Send to my phone** to push it to ntfy/email. If you set
+`CRON_SECRET`, add `?key=<CRON_SECRET>` to the URL.
+
+To send from a script: `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`
+(non-browser requests send the brief, like the daily cron does).
 
 ## Schedule
 
