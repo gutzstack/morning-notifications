@@ -1,5 +1,8 @@
 {
   "crons": [
     { "path": "/api/morning", "schedule": "47 11 * * *" }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/api/morning" }
   ]
 }
