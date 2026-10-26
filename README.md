@@ -33,11 +33,15 @@ To use it:
 
 1. Import this repo into Vercel. No build settings are needed.
 2. Under Project → Settings → Environment Variables, add the same values as the secrets above.
-   Also add `CRON_SECRET`, set to any long random string. Vercel sends it with each cron
-   request, and the endpoint rejects any request that doesn't include it.
+   Optionally add `CRON_SECRET`, set to any long random string. Vercel sends it with each cron
+   request, and the endpoint then rejects any request that doesn't include it. Without it,
+   anyone who knows your app's URL can trigger a brief.
 3. Redeploy. Then turn off the GitHub Actions schedule, or you'll get two briefs every morning.
 
-To trigger it manually: `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`
+To trigger it manually, open `https://<your-app>.vercel.app/api/morning?key=<CRON_SECRET>` in a browser,
+or run `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`.
+With `CRON_SECRET` set, opening `/api/morning` without the key shows "Unauthorized". That is
+expected: it stops strangers from sending you briefs. Without `CRON_SECRET`, just open `/api/morning`.
 
 ## Schedule
 

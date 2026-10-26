@@ -10,9 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from api import morning
 
 
-def call(headers):
+def call(headers, path="/api/morning"):
     h = morning.handler.__new__(morning.handler)
     h.headers = headers
+    h.path = path
     h.wfile = io.BytesIO()
     h.request_version = "HTTP/1.1"
     h.requestline = "GET /api/morning HTTP/1.1"
@@ -36,6 +37,22 @@ class HandlerTest(unittest.TestCase):
              mock.patch.object(morning.morning_brief, "run",
                                return_value=("Title", "Body", True)):
             out = call({"Authorization": "Bearer s3cret"})
+        self.assertIn(" 200 ", out)
+        self.assertIn("Body", out)
+
+    def test_accepts_secret_as_query_param(self):
+        with mock.patch.dict(os.environ, {"CRON_SECRET": "s3cret"}), \
+             mock.patch.object(morning.morning_brief, "run",
+                               return_value=("Title", "Body", True)) as run:
+            self.assertIn(" 401 ", call({}, "/api/morning?key=nope"))
+            self.assertIn(" 200 ", call({}, "/api/morning?key=s3cret"))
+            run.assert_called_once()
+
+    def test_no_cron_secret_runs_without_auth(self):
+        with mock.patch.dict(os.environ, {"CRON_SECRET": ""}), \
+             mock.patch.object(morning.morning_brief, "run",
+                               return_value=("Title", "Body", True)):
+            out = call({})
         self.assertIn(" 200 ", out)
         self.assertIn("Body", out)
 
