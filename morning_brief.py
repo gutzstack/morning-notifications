@@ -181,26 +181,31 @@ def send_email(title: str, body: str) -> None:
         smtp.send_message(msg)
 
 
-def main() -> int:
+def run() -> tuple[str, str, bool]:
+    """Build and deliver today's brief. Returns (title, body, ok)."""
     today = dt.date.today()
     title = f"Good morning! Your brief for {today:%a %b} {today.day}"
     body = build_brief(get_facts(today), fetch_story(US_FEED), fetch_story(WORLD_FEED))
     print(title, body, sep="\n\n")
 
-    failed = False
+    ok = True
     if topic := os.environ.get("NTFY_TOPIC"):
         try:
             send_ntfy(topic, title, body)
         except Exception as e:
             print(f"ntfy delivery failed: {e!r}", file=sys.stderr)
-            failed = True
+            ok = False
     if os.environ.get("SMTP_HOST") and os.environ.get("EMAIL_TO"):
         try:
             send_email(title, body)
         except Exception as e:
             print(f"Email delivery failed: {e!r}", file=sys.stderr)
-            failed = True
-    return 1 if failed else 0
+            ok = False
+    return title, body, ok
+
+
+def main() -> int:
+    return 0 if run()[2] else 1
 
 
 if __name__ == "__main__":

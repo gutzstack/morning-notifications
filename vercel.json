@@ -1,0 +1,8 @@
+{
+  "crons": [
+    { "path": "/api/morning", "schedule": "47 11 * * *" }
+  ],
+  "functions": {
+    "api/morning.py": { "maxDuration": 60 }
+  }
+}

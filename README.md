@@ -26,6 +26,19 @@ It runs every morning on GitHub Actions, so you don't need a server.
    \*You need ntfy or email, or both.
 3. **Test it:** go to Actions → *Morning brief* → *Run workflow*.
 
+## Hosting on Vercel (alternative to GitHub Actions)
+
+`vercel.json` sets up a Vercel Cron job that calls `api/morning.py` once a day at 11:47 UTC.
+To use it:
+
+1. Import this repo into Vercel. No build settings are needed.
+2. Under Project → Settings → Environment Variables, add the same values as the secrets above.
+   Also add `CRON_SECRET`, set to any long random string. Vercel sends it with each cron
+   request, and the endpoint rejects any request that doesn't include it.
+3. Redeploy. Then turn off the GitHub Actions schedule, or you'll get two briefs every morning.
+
+To trigger it manually: `curl -H "Authorization: Bearer $CRON_SECRET" https://<your-app>.vercel.app/api/morning`
+
 ## Schedule
 
 The workflow is set in `.github/workflows/morning-brief.yml` to run at 11:47 UTC. That's
